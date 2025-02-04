@@ -1,5 +1,3 @@
-// all credit goes to mat (https://github.com/matcool)
-
 #pragma once
 #include <Windows.h>
 #include <string>
@@ -29,6 +27,7 @@ namespace subprocess
             SECURITY_ATTRIBUTES security = {};
             security.nLength = sizeof(security);
             security.bInheritHandle = inheritable;
+
             HANDLE read, write;
             CreatePipe(&read, &write, &security, 0);
             return { { read }, { write } };
@@ -51,13 +50,14 @@ namespace subprocess
     public:
         PipePair m_stdin;
         PipePair m_stdout;
-        PROCESS_INFORMATION m_proc_info{};
+        PROCESS_INFORMATION m_proc_info {};
+
     public:
         Popen() {}
+
         Popen(const std::string& command)
         {
             STARTUPINFOW start_info = {};
-
             start_info.cb = sizeof(start_info);
             start_info.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
             start_info.hStdError = GetStdHandle(STD_ERROR_HANDLE);
@@ -67,7 +67,6 @@ namespace subprocess
             start_info.hStdInput = m_stdin.m_read.handle;
             m_stdin.m_write.set_inherit(false);
 
-            // cant include "util.hpp" here, so just copy paste code from myself :D
             auto size = MultiByteToWideChar(CP_UTF8, 0, command.c_str(), -1, nullptr, 0);
             auto buffer = new wchar_t[size];
             MultiByteToWideChar(CP_UTF8, 0, command.c_str(), -1, buffer, size);
